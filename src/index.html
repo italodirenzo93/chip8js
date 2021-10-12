@@ -9,6 +9,8 @@
   <style>
       #screen {
           border: 1px solid black;
+          width: 640px;
+          height: 320px;
       }
   </style>
   <script type="module" src="app.js"></script>
@@ -21,5 +23,45 @@
         height="32"
         class="center-block"
     ></canvas>
+
+    <div id="debug" class="center-block">
+        <div>
+            <h2>Keypad</h2>
+            <div class="keypad">
+                <div data-keycode="0x1">1</div>
+                <div data-keycode="0x2">2</div>
+                <div data-keycode="0x3">3</div>
+                <div data-keycode="0xC">C</div>
+
+                <div data-keycode="0x4">4</div>
+                <div data-keycode="0x5">5</div>
+                <div data-keycode="0x6">6</div>
+                <div data-keycode="0xD">D</div>
+
+                <div data-keycode="0x7">7</div>
+                <div data-keycode="0x8">8</div>
+                <div data-keycode="0x9">9</div>
+                <div data-keycode="0xE">E</div>
+
+                <div data-keycode="0xA">A</div>
+                <div data-keycode="0x0">0</div>
+                <div data-keycode="0xB">B</div>
+                <div data-keycode="0xF">F</div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import {Chip8} from './app.js';
+
+        const canvas = document.querySelector('#screen');
+        const vm = new Chip8(canvas.getContext('2d'));
+
+        window.addEventListener('keydown', (e) => {
+            if (!e.repeat) {
+                console.log(vm.keypad);
+            }
+        });
+    </script>
 </body>
 </html>
