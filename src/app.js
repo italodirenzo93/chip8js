@@ -71,8 +71,8 @@ export class Chip8 {
     }
 
     get opcode() {
-        const msb = this.memory[this.pc];
-        const lsb = this.memory[this.pc + 1];
+        const msb = this.rom[this.pc];
+        const lsb = this.rom[this.pc + 1];
 
         return msb << 8 | lsb;
     }
@@ -251,9 +251,17 @@ export function start(vm) {
  * @param {Chip8} vm
  */
 function update(vm) {
-    console.log(vm.opcode);
+    const next = executeOpcode(vm, vm.opcode);
 
-    if (executeOpcode(vm)) {
+    // Count down timers
+    if (vm.delayTimer > 0) {
+        vm.delayTimer--;
+    }
+    if (vm.soundTimer > 0) {
+        vm.soundTimer--;
+    }
+
+    if (next) {
         setTimeout(() => update(vm), UPDATE_FREQ_HZ);
     }
 }
