@@ -38,7 +38,7 @@
     max-width: 320px;
 }
 
-.keypad > div {
+.keypad > button {
     text-align: center;
     background: #333333;
     color: #ffffff;

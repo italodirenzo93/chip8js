@@ -3,7 +3,7 @@ import { executeOpcode } from "./opcodes";
 const DISPLAY_WIDTH = 64;
 const DISPLAY_HEIGHT = 32;
 
-const UPDATE_FREQ_HZ = 60;
+const UPDATE_FREQ_HZ = 16.666666666667;
 
 // The character set for the emulator
 const fontRom = new Uint8Array([
@@ -62,14 +62,12 @@ export class Chip8 {
 
         // Keypad
         this.keypad = new Uint8ClampedArray(16);
-        this.attachListeners();
+        // this.attachListeners();
 
         // Load font into memory (at the very start)
         for (let i = 0; i < fontRom.length; i++) {
             this.memory[i] = fontRom[i];
         }
-
-        this.running = false;
     }
 
     get opcode() {
@@ -163,7 +161,7 @@ export class Chip8 {
 /**
  * @param {string} keyCode
  */
-function mapKeyCode(keyCode) {
+export function mapKeyCode(keyCode) {
     switch (keyCode) {
         case 'Digit1':
             return 0x1;
@@ -246,12 +244,6 @@ export function getPixel(vm, x, y) {
  * @param {Chip8} vm
  */
 export function start(vm) {
-    if (vm.running) {
-        throw new Error('Virtual machine already running');
-    }
-
-    vm.running = true;
-
     setTimeout(() => update(vm), UPDATE_FREQ_HZ);
 }
 
@@ -260,9 +252,8 @@ export function start(vm) {
  */
 function update(vm) {
     console.log(vm.opcode);
-    executeOpcode(vm);
 
-    if (vm.running) {
+    if (executeOpcode(vm)) {
         setTimeout(() => update(vm), UPDATE_FREQ_HZ);
     }
 }

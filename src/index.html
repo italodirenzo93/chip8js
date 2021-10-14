@@ -21,45 +21,75 @@
         id="screen"
         width="64"
         height="32"
-        class="center-block"
     ></canvas>
 
-    <div id="debug" class="center-block">
+    <div>
+        <label for="rom-upload">ROM File:</label>
+        <input type="file" name="rom-upload" id="rom-upload" />
+    </div>
+
+    <div id="debug">
         <div>
             <h2>Keypad</h2>
             <div class="keypad">
-                <div data-keycode="0x1">1</div>
-                <div data-keycode="0x2">2</div>
-                <div data-keycode="0x3">3</div>
-                <div data-keycode="0xC">C</div>
+                <button data-keycode="0x1">1</button>
+                <button data-keycode="0x2">2</button>
+                <button data-keycode="0x3">3</button>
+                <button data-keycode="0xC">C</button>
 
-                <div data-keycode="0x4">4</div>
-                <div data-keycode="0x5">5</div>
-                <div data-keycode="0x6">6</div>
-                <div data-keycode="0xD">D</div>
+                <button data-keycode="0x4">4</button>
+                <button data-keycode="0x5">5</button>
+                <button data-keycode="0x6">6</button>
+                <button data-keycode="0xD">D</button>
 
-                <div data-keycode="0x7">7</div>
-                <div data-keycode="0x8">8</div>
-                <div data-keycode="0x9">9</div>
-                <div data-keycode="0xE">E</div>
+                <button data-keycode="0x7">7</button>
+                <button data-keycode="0x8">8</button>
+                <button data-keycode="0x9">9</button>
+                <button data-keycode="0xE">E</button>
 
-                <div data-keycode="0xA">A</div>
-                <div data-keycode="0x0">0</div>
-                <div data-keycode="0xB">B</div>
-                <div data-keycode="0xF">F</div>
+                <button data-keycode="0xA">A</button>
+                <button data-keycode="0x0">0</button>
+                <button data-keycode="0xB">B</button>
+                <button data-keycode="0xF">F</button>
             </div>
         </div>
     </div>
 
     <script type="module">
-        import {Chip8} from './app.js';
+        import {Chip8, start, mapKeyCode} from './app.js';
 
         const canvas = document.querySelector('#screen');
         const vm = new Chip8(canvas.getContext('2d'));
 
-        window.addEventListener('keydown', (e) => {
-            if (!e.repeat) {
-                console.log(vm.keypad);
+        // window.addEventListener('keydown', (e) => {
+        //     if (!e.repeat) {
+        //         console.log(vm.keypad);
+        //     }
+        // });
+
+        const romInput = document.querySelector('#rom-upload');
+
+        romInput.addEventListener('input', async (e) => {
+            const file = romInput.files[0];
+            const buffer = await file.arrayBuffer();
+            vm.loadRom(new Uint8Array(buffer));
+            start(vm);
+        });
+
+        // Input
+        const keypad = document.querySelector('.keypad');
+
+        keypad.addEventListener('mousedown', (e) => {
+            if (e.target.tagName.toLowerCase() === 'button') {
+                const keyCode = Number(e.target.dataset['keycode']);
+                vm.keypad[keyCode] = 1;
+            }
+        });
+
+        keypad.addEventListener('mouseup', (e) => {
+            if (e.target.tagName.toLowerCase() === 'button') {
+                const keyCode = Number(e.target.dataset['keycode']);
+                vm.keypad[keyCode] = 0;
             }
         });
     </script>

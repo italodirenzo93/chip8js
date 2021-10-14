@@ -34,6 +34,17 @@ export function executeOpcode(vm) {
             break;
 
         default:
-            throw new Error('Unrecognized opcode: ' + opcode);
+            throw new Error('Unrecognized opcode: ' + formatOpcode(opcode));
     }
+
+    return true;
+}
+
+/**
+ * @param {number} opcode
+ * @returns {string}
+ */
+export function formatOpcode(opcode) {
+    const r = opcode.toString(16).toUpperCase();
+    return '0x' + r.padStart(4, '0');
 }
