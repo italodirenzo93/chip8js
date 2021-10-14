@@ -1,4 +1,4 @@
-import {Chip8} from './app';
+import { Chip8 } from './app';
 
 /**
  * @param {Chip8} vm
