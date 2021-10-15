@@ -1,4 +1,4 @@
-import { Chip8 } from './app';
+import { Chip8, getPixel, setPixel, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
 
 /**
  * @param {Chip8} vm
@@ -205,9 +205,18 @@ export function executeOpcode(vm, opcode) {
             vm.step();
             break;
 
-        // // Draw sprite
-        // case 0xD000:
-        //     break;
+        // Draw sprite
+        case 0xD000:
+            draw(
+                vm,
+                (opcode & 0x0F00) >> 8,
+                (opcode & 0x00F0) >> 4,
+                opcode & 0x000F
+            );
+
+            vm.drawDisplay();
+            vm.step();
+            break;
 
         // Check keypad
         case 0xE000:
@@ -217,7 +226,7 @@ export function executeOpcode(vm, opcode) {
                 switch (opcode & 0x00FF) {
                     // Key down
                     case 0x009E:
-                        if (vm.keypad[keycode] === 1) {
+                        if (vm.keypad[keycode] > 0) {
                             vm.step(); // skip the next instruction
                         }
 
@@ -248,8 +257,20 @@ export function executeOpcode(vm, opcode) {
                         vm.step();
                         break;
 
-                    // // Key wait
+                    // Key wait
                     // case 0x000A:
+                    //     {
+                    //         const key = vm.keypad.findIndex(k => k === 1);
+                    //         if (key === -1) {
+                    //             // Return early without advancing and wait for a keypress
+                    //             return true;
+                    //         }
+
+                    //         // Place the pressed key in the specified register
+                    //         vm.v[x] = key;
+
+                    //         vm.step();
+                    //     }
                     //     break;
 
                     // Set delay timer
@@ -323,4 +344,46 @@ export function executeOpcode(vm, opcode) {
 export function formatOpcode(opcode) {
     const r = opcode.toString(16).toUpperCase();
     return '0x' + r.padStart(4, '0');
+}
+
+/**
+ * @param {Chip8} vm
+ * @param {number} x
+ * @param {number} y
+ * @param {number} n
+ */
+function draw(vm, x, y, n) {
+    const startX = vm.v[x];
+    const startY = vm.v[y];
+
+    if (startX >= DISPLAY_WIDTH) {
+        startX = startX % DISPLAY_WIDTH;
+    }
+    if (startY >= DISPLAY_HEIGHT) {
+        startY = startY % DISPLAY_HEIGHT;
+    }
+
+    const endX = Math.min(startX + 8, DISPLAY_WIDTH);
+    const endY = Math.min(startY + n, DISPLAY_HEIGHT);
+
+    vm.v[0xF] = 0;
+
+    for (let y = startY; y < endY; y++) {
+        const spriteByte = vm.memory[vm.i + (y - startY)];
+        for (let x = startX; x < endX; x++) {
+            // NOTE: spritePixel and screenPixel are 0 or non-zero
+            // not 0 or 1 !!!
+            const spritePixel = spriteByte & (0x80 >> (x - startX));
+            const screenPixel = getPixel(vm, x, y);
+
+            if(spritePixel) {
+                if(screenPixel) {
+                    vm.v[0xF] = 1;
+                }
+
+                setPixel(vm, x, y, screenPixel);
+            }
+        }
+    }
+
 }

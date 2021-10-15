@@ -1,7 +1,7 @@
 import { executeOpcode } from "./opcodes";
 
-const DISPLAY_WIDTH = 64;
-const DISPLAY_HEIGHT = 32;
+export const DISPLAY_WIDTH = 64;
+export const DISPLAY_HEIGHT = 32;
 
 const UPDATE_FREQ_HZ = 16.666666666667;
 
@@ -227,7 +227,7 @@ export function getPixel(vm, x, y) {
     const byteIndex = index / 8;
     const offset = index % 8;
 
-    const byte = vm.display[byteIndex];
+    let byte = vm.display[byteIndex];
 
     if (value > 0) {
         byte = byte | (0x80 >> offset);
