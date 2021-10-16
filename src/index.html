@@ -6,22 +6,25 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge"  />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="stylesheet" href="app.css" />
-  <style>
-      #screen {
-          border: 1px solid black;
-          width: 640px;
-          height: 320px;
-      }
-  </style>
   <script type="module" src="app.js"></script>
 </head>
 <body>
     <!-- Canvas at original resolution (will be scaled) -->
-    <canvas
-        id="screen"
-        width="64"
-        height="32"
-    ></canvas>
+    <div>
+        <canvas
+            id="screen"
+            width="64"
+            height="32"
+        ></canvas>
+        <style>
+            #screen {
+                border: 1px solid black;
+                width: 640px;
+                height: 320px;
+                image-rendering: pixelated;
+            }
+        </style>
+    </div>
 
     <div>
         <label for="rom-upload">ROM File:</label>

@@ -1,4 +1,4 @@
-import { Chip8, getPixel, setPixel, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
+import { Chip8, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
 
 /**
  * @param {Chip8} vm
@@ -13,16 +13,20 @@ export function executeOpcode(vm, opcode) {
             switch (opcode & 0x00FF) {
                 // Clear the display
                 case 0x00E0:
-                    vm.display.fill(0);
-                    vm.drawDisplay();
-
+                    clearDisplay(vm);
                     vm.step();
+
                     break;
                 // Return from sub-routine
                 case 0x00EE:
-                    vm.pc = vm.stack[--vm.sp];
+                    vm.pc = vm.stack.pop();
                     vm.step();
                     break;
+
+                case 0x0000:
+                    console.log('Program terminated.');
+                    return false;
+
                 default:
                     console.log('NOOP ' + formatOpcode(opcode));
                     return false;
@@ -36,7 +40,7 @@ export function executeOpcode(vm, opcode) {
 
         // Call sub-routine
         case 0x2000:
-            vm.stack[vm.sp++] = vm.pc;
+            vm.stack.push(vm.pc);
             vm.pc = opcode & 0x0FFF;
             break;
 
@@ -207,14 +211,13 @@ export function executeOpcode(vm, opcode) {
 
         // Draw sprite
         case 0xD000:
-            draw(
+            drawDisplay(
                 vm,
                 (opcode & 0x0F00) >> 8,
                 (opcode & 0x00F0) >> 4,
                 opcode & 0x000F
             );
 
-            vm.drawDisplay();
             vm.step();
             break;
 
@@ -348,42 +351,45 @@ export function formatOpcode(opcode) {
 
 /**
  * @param {Chip8} vm
+ */
+function clearDisplay(vm) {
+    const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+    const length = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
+
+    for (let i = 0; i < length; i += 4) {
+        imageData.data[i] = 0;
+        imageData.data[i + 1] = 0;
+        imageData.data[i + 2] = 0;
+        imageData.data[i + 3] = 255;
+    }
+
+    vm.ctx.putImageData(imageData, 0, 0);
+}
+
+/**
+ * Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+ * Each row of 8 pixels is read as bit-coded starting from memory location I; I value does
+ * not change after the execution of this instruction. As described above, VF is set to 1 if any
+ * screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
+ *
+ * @param {Chip8} vm
  * @param {number} x
  * @param {number} y
  * @param {number} n
  */
-function draw(vm, x, y, n) {
-    const startX = vm.v[x];
-    const startY = vm.v[y];
+function drawDisplay(vm, x, y, n) {
+    const frame = vm.ctx.getImageData(vm.v[x], vm.v[y], 8, n);
+    const length = vm.v[x] * vm.v[y] * 4;
 
-    if (startX >= DISPLAY_WIDTH) {
-        startX = startX % DISPLAY_WIDTH;
-    }
-    if (startY >= DISPLAY_HEIGHT) {
-        startY = startY % DISPLAY_HEIGHT;
-    }
+    for (let i = 0; i < length; i+= 4) {
+        const prevOn = frame.data[i] & frame.data[i + 1] & frame.data[i + 2] & 1;
+        const nextOn = prevOn & 1 ? 255 : 0;
 
-    const endX = Math.min(startX + 8, DISPLAY_WIDTH);
-    const endY = Math.min(startY + n, DISPLAY_HEIGHT);
-
-    vm.v[0xF] = 0;
-
-    for (let y = startY; y < endY; y++) {
-        const spriteByte = vm.memory[vm.i + (y - startY)];
-        for (let x = startX; x < endX; x++) {
-            // NOTE: spritePixel and screenPixel are 0 or non-zero
-            // not 0 or 1 !!!
-            const spritePixel = spriteByte & (0x80 >> (x - startX));
-            const screenPixel = getPixel(vm, x, y);
-
-            if(spritePixel) {
-                if(screenPixel) {
-                    vm.v[0xF] = 1;
-                }
-
-                setPixel(vm, x, y, screenPixel);
-            }
-        }
+        frame.data[i] = nextOn;
+        frame.data[i + 1] = nextOn;
+        frame.data[i + 2] = nextOn;
+        frame.data[i + 3] = 255; // alpha
     }
 
+    vm.ctx.putImageData(frame, vm.v[x], vm.v[y]);
 }

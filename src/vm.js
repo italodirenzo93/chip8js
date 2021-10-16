@@ -3,6 +3,7 @@ import { executeOpcode } from "./opcodes";
 export const DISPLAY_WIDTH = 64;
 export const DISPLAY_HEIGHT = 32;
 
+const ROM_START_OFFSET = 0x200;
 const UPDATE_FREQ_HZ = 16.666666666667;
 
 // The character set for the emulator
@@ -34,40 +35,24 @@ export class Chip8 {
         this.ctx = context;
 
         // Main VM memory
-        const buffer = new ArrayBuffer(4096);
+        // this.buffer = new ArrayBuffer(4096);
 
         // Read/write access
-        this.memory = new Uint8Array(buffer);
+        this.memory = new Uint8Array(4096);
 
         // Create some spans over specific regions of memory
-        this.rom = new Uint8Array(buffer, 0x200, 3232);
-        this.stack = new Uint8Array(buffer, 0xEA0, 96);
-        this.display = new Uint8ClampedArray(buffer, 0xF00, 256);
+        // this.rom = new Uint8Array(this.buffer, 0x200, 3232);
+
+        // Call stack
+        this.stack = [];
 
         // Registers (V0-VF)
         this.v = new Uint8Array(16);
 
-        // Index register
-        this.i = 0;
-
-        // Program counter
-        this.pc = this.rom.byteOffset;
-
-        // Stack pointer
-        this.sp = 0;
-
-        // Timers
-        this.delayTimer = 0;
-        this.soundTimer = 0;
-
         // Keypad
         this.keypad = new Uint8ClampedArray(16);
-        // this.attachListeners();
 
-        // Load font into memory (at the very start)
-        for (let i = 0; i < fontRom.length; i++) {
-            this.memory[i] = fontRom[i];
-        }
+        this.reset();
     }
 
     get opcode() {
@@ -77,10 +62,26 @@ export class Chip8 {
         return msb << 8 | lsb;
     }
 
+    reset() {
+        // Index register
+        this.i = 0;
+
+        // Program counter
+        this.pc = ROM_START_OFFSET;
+
+        // Timers
+        this.delayTimer = 0;
+        this.soundTimer = 0;
+
+        // Zero out all memory
+        this.memory.fill(0x00);
+        if (this.stack.length) {
+            this.stack = [];
+        }
+    }
+
     step() {
         this.pc += 2;
-
-        return this;
     }
 
     /**
@@ -89,32 +90,17 @@ export class Chip8 {
      * @param {Uint8Array} rom The CHIP-8 program to load
      */
     loadRom(rom) {
-        for (let i = 0; i < rom.length; i++) {
-            this.rom[i] = rom[i];
-        }
-    }
+        let i;
 
-    /**
-     * Draws the current state the VM to the canvas.
-     */
-    drawDisplay() {
-        const bitmap = this.ctx.createImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-
-        let x, y;
-        for (y = 0; y < DISPLAY_HEIGHT; y++) {
-            for (x = 0; x < DISPLAY_WIDTH; x++) {
-                const pixel = getPixel(this, x, y) > 0 ? 255 : 0;
-
-                const index = (y * DISPLAY_WIDTH * 4) + (x * 4);
-
-                bitmap.data[index] = pixel;
-                bitmap.data[index + 1] = pixel;
-                bitmap.data[index + 2] = pixel;
-                bitmap.data[index + 3] = 255; // opaque
-            }
+        // Load the rom data at program start location
+        for (i = 0; i < rom.length; i++) {
+            this.memory[i + ROM_START_OFFSET] = rom[i];
         }
 
-        this.ctx.putImageData(bitmap, 0, 0);
+        // Load font into memory (at the very start)
+        for (i = 0; i < fontRom.length; i++) {
+            this.memory[i] = fontRom[i];
+        }
     }
 
     /**
@@ -202,40 +188,6 @@ export function mapKeyCode(keyCode) {
         default:
             return -1;
     }
-}
-
-/**
- * @param {Chip8} vm CHIP-8 instance
- * @param {number} x The X coordinate
- * @param {number} y The Y coordinate
- */
-export function getPixel(vm, x, y) {
-    const index = y * DISPLAY_WIDTH + x;
-    const byteIndex = index / 8;
-    const offset = index % 8;
-    return vm.display[byteIndex] & (0x80 >> offset);
-}
-
-/**
- * @param {Chip8} vm CHIP-8 instance
- * @param {number} x The X coordinate
- * @param {number} y The Y coordinate
- * @param {number} value The pixel value
- */
- export function setPixel(vm, x, y, value) {
-    const index = y * DISPLAY_WIDTH + x;
-    const byteIndex = index / 8;
-    const offset = index % 8;
-
-    let byte = vm.display[byteIndex];
-
-    if (value > 0) {
-        byte = byte | (0x80 >> offset);
-    } else {
-        byte = byte & (~(0x80 >> offset));
-    }
-
-    vm.display[byteIndex] = byte;
 }
 
 /**
