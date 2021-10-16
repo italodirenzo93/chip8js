@@ -78,6 +78,8 @@ export class Chip8 {
         if (this.stack.length) {
             this.stack = [];
         }
+
+        this.clearDisplay();
     }
 
     step() {
@@ -141,6 +143,20 @@ export class Chip8 {
         }
 
         this.keypad[key] = 0;
+    }
+
+    clearDisplay() {
+        const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        const length = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
+
+        for (let i = 0; i < length; i += 4) {
+            imageData.data[i] = 0;
+            imageData.data[i + 1] = 0;
+            imageData.data[i + 2] = 0;
+            imageData.data[i + 3] = 255;
+        }
+
+        this.ctx.putImageData(imageData, 0, 0);
     }
 }
 

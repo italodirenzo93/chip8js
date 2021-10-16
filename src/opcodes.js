@@ -13,7 +13,7 @@ export function executeOpcode(vm, opcode) {
             switch (opcode & 0x00FF) {
                 // Clear the display
                 case 0x00E0:
-                    clearDisplay(vm);
+                    vm.clearDisplay();
                     vm.step();
 
                     break;
@@ -347,23 +347,6 @@ export function executeOpcode(vm, opcode) {
 export function formatOpcode(opcode) {
     const r = opcode.toString(16).toUpperCase();
     return '0x' + r.padStart(4, '0');
-}
-
-/**
- * @param {Chip8} vm
- */
-function clearDisplay(vm) {
-    const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-    const length = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
-
-    for (let i = 0; i < length; i += 4) {
-        imageData.data[i] = 0;
-        imageData.data[i + 1] = 0;
-        imageData.data[i + 2] = 0;
-        imageData.data[i + 3] = 255;
-    }
-
-    vm.ctx.putImageData(imageData, 0, 0);
 }
 
 /**
