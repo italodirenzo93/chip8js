@@ -1,10 +1,11 @@
 import { Chip8, start } from './vm';
 
 window.addEventListener('load', () => {
-    const canvas = document.querySelector('#screen');
+    const canvas = document.querySelector('canvas');
 
     const vm = new Chip8(canvas.getContext('2d'));
 
+    // Files
     const romInput = document.querySelector('#rom-upload');
 
     romInput.addEventListener('input', async () => {

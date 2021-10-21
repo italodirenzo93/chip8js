@@ -211,10 +211,9 @@ export function executeOpcode(vm, opcode) {
 
         // Draw sprite
         case 0xD000:
-            drawDisplay(
-                vm,
-                (opcode & 0x0F00) >> 8,
-                (opcode & 0x00F0) >> 4,
+            vm.drawSprite(
+                vm.v[(opcode & 0x0F00) >> 8],
+                vm.v[(opcode & 0x00F0) >> 4],
                 opcode & 0x000F
             );
 
@@ -347,32 +346,4 @@ export function executeOpcode(vm, opcode) {
 export function formatOpcode(opcode) {
     const r = opcode.toString(16).toUpperCase();
     return '0x' + r.padStart(4, '0');
-}
-
-/**
- * Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
- * Each row of 8 pixels is read as bit-coded starting from memory location I; I value does
- * not change after the execution of this instruction. As described above, VF is set to 1 if any
- * screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
- *
- * @param {Chip8} vm
- * @param {number} x
- * @param {number} y
- * @param {number} n
- */
-function drawDisplay(vm, x, y, n) {
-    const frame = vm.ctx.getImageData(vm.v[x], vm.v[y], 8, n);
-    const length = vm.v[x] * vm.v[y] * 4;
-
-    for (let i = 0; i < length; i+= 4) {
-        const prevOn = frame.data[i] & frame.data[i + 1] & frame.data[i + 2] & 1;
-        const nextOn = prevOn & 1 ? 255 : 0;
-
-        frame.data[i] = nextOn;
-        frame.data[i + 1] = nextOn;
-        frame.data[i + 2] = nextOn;
-        frame.data[i + 3] = 255; // alpha
-    }
-
-    vm.ctx.putImageData(frame, vm.v[x], vm.v[y]);
 }

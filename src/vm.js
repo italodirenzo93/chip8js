@@ -5,6 +5,8 @@ export const DISPLAY_HEIGHT = 32;
 
 const ROM_START_OFFSET = 0x200;
 const UPDATE_FREQ_HZ = 16.666666666667;
+const PIXEL_ON = 0xFF;
+const PIXEL_OFF = 0x00;
 
 // The character set for the emulator
 const fontRom = new Uint8Array([
@@ -147,16 +149,63 @@ export class Chip8 {
 
     clearDisplay() {
         const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        const length = DISPLAY_WIDTH * DISPLAY_HEIGHT * 4;
+        const length = (DISPLAY_WIDTH * 4) * DISPLAY_HEIGHT;
 
         for (let i = 0; i < length; i += 4) {
-            imageData.data[i] = 0;
-            imageData.data[i + 1] = 0;
-            imageData.data[i + 2] = 0;
-            imageData.data[i + 3] = 255;
+            imageData.data[i] = PIXEL_OFF;
+            imageData.data[i + 1] = PIXEL_OFF;
+            imageData.data[i + 2] = PIXEL_OFF;
+            imageData.data[i + 3] = 0xFF; // alpha
         }
 
         this.ctx.putImageData(imageData, 0, 0);
+    }
+
+    /**
+     * Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
+     * Each row of 8 pixels is read as bit-coded starting from memory location I; I value does
+     * not change after the execution of this instruction. As described above, VF is set to 1 if any
+     * screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
+     *
+     * @param {number} x X Coordinate
+     * @param {number} y Y Coordinate
+     * @param {number} n Height
+     */
+    drawSprite(x, y, n) {
+        const frame = this.ctx.getImageData(x, y, 8, n);
+        const length = (x * 4) * n;
+
+        if (x >= DISPLAY_WIDTH) {
+            x = x % DISPLAY_WIDTH;
+        }
+
+        if (y >= DISPLAY_HEIGHT) {
+            y = y % DISPLAY_HEIGHT;
+        }
+
+        let endX = Math.min(x + 8, DISPLAY_WIDTH);
+        let endY = Math.min(y + n, DISPLAY_HEIGHT);
+
+        this.v[0xF] = 0x0;
+
+        for (let sy = y; sy < endY; sy++) {
+            const spriteByte = this.memory[this.i + (sy - y)];
+            for (let sx = x; sx < endX; sx++) {
+
+            }
+        }
+
+        for (let i = 0; i < length; i += 4) {
+            const prevOn = frame.data[i] > 0 && frame.data[i + 1] > 0 && frame.data[i + 2] > 0;
+            const nextOn = prevOn ? PIXEL_OFF : PIXEL_ON;
+
+            frame.data[i] = nextOn;
+            frame.data[i + 1] = nextOn;
+            frame.data[i + 2] = nextOn;
+            frame.data[i + 3] = 0xFF; // alpha
+        }
+
+        this.ctx.putImageData(frame, x, y);
     }
 }
 

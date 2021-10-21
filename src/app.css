@@ -1,32 +1,14 @@
-.center-block {
-    display: block;
+.container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    max-width: 800px;
     margin: auto;
 }
 
-.flex {
-    display: flex;
-}
-
-.flex-row {
-    flex-direction: row;
-    flex-wrap: nowrap;
-}
-
-.flex-column {
-    flex-direction: column;
-    flex-wrap: none;
-}
-
-.justify-center {
-    justify-content: center;
-}
-
-.justify-around {
-    justify-content: space-around;
-}
-
-.justify-even {
-    justify-content: space-evenly;
+canvas {
+    border: 1px solid black;
+    image-rendering: pixelated;
 }
 
 .keypad {
@@ -37,11 +19,11 @@
     gap: 5px;
 }
 
-.keypad > button {
+.keypad button {
     text-align: center;
     background: #333333;
     color: #ffffff;
-    font-weight: 800;
+    font-size: 1.2rem;
 
     display: flex;
     justify-content: center;
