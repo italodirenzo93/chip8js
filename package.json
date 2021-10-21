@@ -1,6 +1,9 @@
 {
   "name": "chip8",
   "private": true,
+  "repository": {
+      "url": "https://github.com/italodirenzo93/chip8js"
+  },
   "source": "src/index.html",
   "scripts": {
     "start": "parcel",

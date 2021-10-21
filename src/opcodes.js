@@ -1,4 +1,4 @@
-import { Chip8, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
+import { Chip8 } from './vm';
 
 /**
  * @param {Chip8} vm
@@ -7,18 +7,18 @@ import { Chip8, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
 export function executeOpcode(vm, opcode) {
     console.log('Executing: ' + formatOpcode(opcode));
 
-    switch (opcode & 0xF000) {
+    switch (opcode & 0xf000) {
         // Call a machine code routine
         case 0x0000:
-            switch (opcode & 0x00FF) {
+            switch (opcode & 0x00ff) {
                 // Clear the display
-                case 0x00E0:
+                case 0x00e0:
                     vm.clearDisplay();
                     vm.step();
 
                     break;
                 // Return from sub-routine
-                case 0x00EE:
+                case 0x00ee:
                     vm.pc = vm.stack.pop();
                     vm.step();
                     break;
@@ -35,18 +35,18 @@ export function executeOpcode(vm, opcode) {
 
         // JUMP
         case 0x1000:
-            vm.pc = opcode & 0x0FFF;
+            vm.pc = opcode & 0x0fff;
             break;
 
         // Call sub-routine
         case 0x2000:
             vm.stack.push(vm.pc);
-            vm.pc = opcode & 0x0FFF;
+            vm.pc = opcode & 0x0fff;
             break;
 
         // Equals
         case 0x3000:
-            if (vm.v[(opcode & 0x0F00) >> 8] === opcode & 0x00FF) {
+            if ((vm.v[(opcode & 0x0f00) >> 8] === opcode) & 0x00ff) {
                 vm.step(); // skip the next instruction
             }
 
@@ -55,7 +55,7 @@ export function executeOpcode(vm, opcode) {
 
         // Not Equals
         case 0x4000:
-            if (vm.v[(opcode & 0x0F00) >> 8] !== opcode & 0x00FF) {
+            if ((vm.v[(opcode & 0x0f00) >> 8] !== opcode) & 0x00ff) {
                 vm.step(); // skip the next instruction
             }
 
@@ -64,7 +64,7 @@ export function executeOpcode(vm, opcode) {
 
         // VX Equals VY
         case 0x5000:
-            if (vm.v[(opcode & 0x0F00) >> 8] === vm.v[(opcode & 0x00F0) >> 4]) {
+            if (vm.v[(opcode & 0x0f00) >> 8] === vm.v[(opcode & 0x00f0) >> 4]) {
                 vm.step(); // skip the next instruction
             }
 
@@ -73,23 +73,23 @@ export function executeOpcode(vm, opcode) {
 
         // Assign
         case 0x6000:
-            vm.v[(opcode & 0x0F00) >> 8] = opcode & 0x00FF;
+            vm.v[(opcode & 0x0f00) >> 8] = opcode & 0x00ff;
             vm.step();
             break;
 
         // Addition
         case 0x7000:
-            vm.v[(opcode & 0x0F00) >> 8] += opcode & 0x00FF;
+            vm.v[(opcode & 0x0f00) >> 8] += opcode & 0x00ff;
             vm.step();
             break;
 
         // Arithmetic
         case 0x8000:
             {
-                const x = (opcode & 0x0F00) >> 8;
-                const y = (opcode & 0x00F0) >> 4;
+                const x = (opcode & 0x0f00) >> 8;
+                const y = (opcode & 0x00f0) >> 4;
 
-                switch (opcode & 0x000F) {
+                switch (opcode & 0x000f) {
                     // Assign VY to VX
                     case 0x0000:
                         vm.v[x] = vm.v[y];
@@ -121,9 +121,9 @@ export function executeOpcode(vm, opcode) {
 
                             // set carry flag
                             if (sum > 255) {
-                                vm.v[0xF] = 1;
+                                vm.v[0xf] = 1;
                             } else {
-                                vm.v[0xF] = 0;
+                                vm.v[0xf] = 0;
                             }
 
                             vm.v[x] = sum;
@@ -137,9 +137,9 @@ export function executeOpcode(vm, opcode) {
                         {
                             // set carry flag
                             if (vm.v[x] > vm.v[y]) {
-                                vm.v[0xF] = 1;
+                                vm.v[0xf] = 1;
                             } else {
-                                vm.v[0xF] = 0;
+                                vm.v[0xf] = 0;
                             }
 
                             vm.v[x] = vm.v[x] - vm.v[y];
@@ -150,7 +150,7 @@ export function executeOpcode(vm, opcode) {
 
                     // Bitshift right
                     case 0x0006:
-                        vm.v[0xF] = vm.v[x] & 0x1;
+                        vm.v[0xf] = vm.v[x] & 0x1;
                         vm.v[x] = vm.v[y] >> 1;
 
                         vm.step();
@@ -163,29 +163,31 @@ export function executeOpcode(vm, opcode) {
                             const vy = vm.v[y];
 
                             vm.v[x] = vy - vx;
-                            vm.v[0xF] = vy < vx ? 0 : 1;
+                            vm.v[0xf] = vy < vx ? 0 : 1;
 
                             vm.step();
                         }
                         break;
 
                     // Bitshift left
-                    case 0x000E:
-                        vm.v[0xF] = (vm.v[x] >> 7) & 0x1;
+                    case 0x000e:
+                        vm.v[0xf] = (vm.v[x] >> 7) & 0x1;
                         vm.v[x] = vm.v[y] << 1;
 
                         vm.step();
                         break;
 
                     default:
-                        throw new Error('Unrecognized opcode: ' + formatOpcode(opcode));
+                        throw new Error(
+                            'Unrecognized opcode: ' + formatOpcode(opcode)
+                        );
                 }
             }
             break;
 
-         // VX Not Equals VY
-         case 0x9000:
-            if (vm.v[(opcode & 0x0F00) >> 8] !== vm.v[(opcode & 0x00F0) >> 4]) {
+        // VX Not Equals VY
+        case 0x9000:
+            if (vm.v[(opcode & 0x0f00) >> 8] !== vm.v[(opcode & 0x00f0) >> 4]) {
                 vm.step(); // skip the next instruction
             }
 
@@ -193,41 +195,42 @@ export function executeOpcode(vm, opcode) {
             break;
 
         // Set index register
-        case 0xA000:
-            vm.i = opcode & 0x0FFF;
+        case 0xa000:
+            vm.i = opcode & 0x0fff;
             vm.step();
             break;
 
         // Jump with offset
-        case 0xB000:
-            vm.pc = (opcode & 0x00FF) + vm.v[(opcode & 0x0F00) >> 8];
+        case 0xb000:
+            vm.pc = (opcode & 0x00ff) + vm.v[(opcode & 0x0f00) >> 8];
             break;
 
         // Bitwise random
-        case 0xC000:
-            vm.v[(opcode & 0x0F00) >> 8] = Math.floor(Math.random() * 255) & (opcode & 0x00FF);
+        case 0xc000:
+            vm.v[(opcode & 0x0f00) >> 8] =
+                Math.floor(Math.random() * 255) & (opcode & 0x00ff);
             vm.step();
             break;
 
         // Draw sprite
-        case 0xD000:
+        case 0xd000:
             vm.drawSprite(
-                vm.v[(opcode & 0x0F00) >> 8],
-                vm.v[(opcode & 0x00F0) >> 4],
-                opcode & 0x000F
+                vm.v[(opcode & 0x0f00) >> 8],
+                vm.v[(opcode & 0x00f0) >> 4],
+                opcode & 0x000f
             );
 
             vm.step();
             break;
 
         // Check keypad
-        case 0xE000:
+        case 0xe000:
             {
-                const keycode = (opcode & 0x0F00) >> 8;
+                const keycode = (opcode & 0x0f00) >> 8;
 
-                switch (opcode & 0x00FF) {
+                switch (opcode & 0x00ff) {
                     // Key down
-                    case 0x009E:
+                    case 0x009e:
                         if (vm.keypad[keycode] > 0) {
                             vm.step(); // skip the next instruction
                         }
@@ -236,7 +239,7 @@ export function executeOpcode(vm, opcode) {
                         break;
 
                     // Key up
-                    case 0x00A1:
+                    case 0x00a1:
                         if (vm.keypad[keycode] === 0) {
                             vm.step(); // skip the next instruction
                         }
@@ -248,11 +251,11 @@ export function executeOpcode(vm, opcode) {
             break;
 
         // Other
-        case 0xF000:
+        case 0xf000:
             {
-                const x = (opcode & 0x0F00) >> 8;
+                const x = (opcode & 0x0f00) >> 8;
 
-                switch (opcode & 0x00FF) {
+                switch (opcode & 0x00ff) {
                     // Read delay timer
                     case 0x0007:
                         vm.v[x] = vm.delayTimer;
@@ -288,7 +291,7 @@ export function executeOpcode(vm, opcode) {
                         break;
 
                     // Add to index
-                    case 0x001E:
+                    case 0x001e:
                         vm.i += vm.v[x];
                         vm.step();
                         break;
@@ -327,7 +330,9 @@ export function executeOpcode(vm, opcode) {
                         break;
 
                     default:
-                        throw new Error('Unrecognized opcode: ' + formatOpcode(opcode));
+                        throw new Error(
+                            'Unrecognized opcode: ' + formatOpcode(opcode)
+                        );
                 }
             }
             break;

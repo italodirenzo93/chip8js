@@ -1,32 +1,23 @@
-import { executeOpcode } from "./opcodes";
+import { executeOpcode } from './opcodes';
 
 export const DISPLAY_WIDTH = 64;
 export const DISPLAY_HEIGHT = 32;
 
 const ROM_START_OFFSET = 0x200;
 const UPDATE_FREQ_HZ = 16.666666666667;
-const PIXEL_ON = 0xFF;
+const PIXEL_ON = 0xff;
 const PIXEL_OFF = 0x00;
 
 // The character set for the emulator
 const fontRom = new Uint8Array([
     // 4x5 font sprites (0-F)
-    0xF0, 0x90, 0x90, 0x90, 0xF0,
-    0x20, 0x60, 0x20, 0x20, 0x70,
-    0xF0, 0x10, 0xF0, 0x80, 0xF0,
-    0xF0, 0x10, 0xF0, 0x10, 0xF0,
-    0xA0, 0xA0, 0xF0, 0x20, 0x20,
-    0xF0, 0x80, 0xF0, 0x10, 0xF0,
-    0xF0, 0x80, 0xF0, 0x90, 0xF0,
-    0xF0, 0x10, 0x20, 0x40, 0x40,
-    0xF0, 0x90, 0xF0, 0x90, 0xF0,
-    0xF0, 0x90, 0xF0, 0x10, 0xF0,
-    0xF0, 0x90, 0xF0, 0x90, 0x90,
-    0xE0, 0x90, 0xE0, 0x90, 0xE0,
-    0xF0, 0x80, 0x80, 0x80, 0xF0,
-    0xE0, 0x90, 0x90, 0x90, 0xE0,
-    0xF0, 0x80, 0xF0, 0x80, 0xF0,
-    0xF0, 0x80, 0xF0, 0x80, 0x80,
+    0xf0, 0x90, 0x90, 0x90, 0xf0, 0x20, 0x60, 0x20, 0x20, 0x70, 0xf0, 0x10,
+    0xf0, 0x80, 0xf0, 0xf0, 0x10, 0xf0, 0x10, 0xf0, 0xa0, 0xa0, 0xf0, 0x20,
+    0x20, 0xf0, 0x80, 0xf0, 0x10, 0xf0, 0xf0, 0x80, 0xf0, 0x90, 0xf0, 0xf0,
+    0x10, 0x20, 0x40, 0x40, 0xf0, 0x90, 0xf0, 0x90, 0xf0, 0xf0, 0x90, 0xf0,
+    0x10, 0xf0, 0xf0, 0x90, 0xf0, 0x90, 0x90, 0xe0, 0x90, 0xe0, 0x90, 0xe0,
+    0xf0, 0x80, 0x80, 0x80, 0xf0, 0xe0, 0x90, 0x90, 0x90, 0xe0, 0xf0, 0x80,
+    0xf0, 0x80, 0xf0, 0xf0, 0x80, 0xf0, 0x80, 0x80,
 ]);
 
 export class Chip8 {
@@ -61,7 +52,7 @@ export class Chip8 {
         const msb = this.memory[this.pc];
         const lsb = this.memory[this.pc + 1];
 
-        return msb << 8 | lsb;
+        return (msb << 8) | lsb;
     }
 
     reset() {
@@ -149,13 +140,13 @@ export class Chip8 {
 
     clearDisplay() {
         const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        const length = (DISPLAY_WIDTH * 4) * DISPLAY_HEIGHT;
+        const length = DISPLAY_WIDTH * 4 * DISPLAY_HEIGHT;
 
         for (let i = 0; i < length; i += 4) {
             imageData.data[i] = PIXEL_OFF;
             imageData.data[i + 1] = PIXEL_OFF;
             imageData.data[i + 2] = PIXEL_OFF;
-            imageData.data[i + 3] = 0xFF; // alpha
+            imageData.data[i + 3] = 0xff; // alpha
         }
 
         this.ctx.putImageData(imageData, 0, 0);
@@ -173,7 +164,7 @@ export class Chip8 {
      */
     drawSprite(x, y, n) {
         const frame = this.ctx.getImageData(x, y, 8, n);
-        const length = (x * 4) * n;
+        const length = x * 4 * n;
 
         if (x >= DISPLAY_WIDTH) {
             x = x % DISPLAY_WIDTH;
@@ -186,23 +177,24 @@ export class Chip8 {
         let endX = Math.min(x + 8, DISPLAY_WIDTH);
         let endY = Math.min(y + n, DISPLAY_HEIGHT);
 
-        this.v[0xF] = 0x0;
+        this.v[0xf] = 0x0;
 
         for (let sy = y; sy < endY; sy++) {
             const spriteByte = this.memory[this.i + (sy - y)];
-            for (let sx = x; sx < endX; sx++) {
-
-            }
+            for (let sx = x; sx < endX; sx++) {}
         }
 
         for (let i = 0; i < length; i += 4) {
-            const prevOn = frame.data[i] > 0 && frame.data[i + 1] > 0 && frame.data[i + 2] > 0;
+            const prevOn =
+                frame.data[i] > 0 &&
+                frame.data[i + 1] > 0 &&
+                frame.data[i + 2] > 0;
             const nextOn = prevOn ? PIXEL_OFF : PIXEL_ON;
 
             frame.data[i] = nextOn;
             frame.data[i + 1] = nextOn;
             frame.data[i + 2] = nextOn;
-            frame.data[i + 3] = 0xFF; // alpha
+            frame.data[i + 3] = 0xff; // alpha
         }
 
         this.ctx.putImageData(frame, x, y);
@@ -221,7 +213,7 @@ export function mapKeyCode(keyCode) {
         case 'Digit3':
             return 0x3;
         case 'Digit4':
-            return 0xC;
+            return 0xc;
 
         case 'KeyQ':
             return 0x4;
@@ -230,7 +222,7 @@ export function mapKeyCode(keyCode) {
         case 'KeyE':
             return 0x6;
         case 'KeyR':
-            return 0xD;
+            return 0xd;
 
         case 'KeyA':
             return 0x7;
@@ -239,16 +231,16 @@ export function mapKeyCode(keyCode) {
         case 'KeyD':
             return 0x9;
         case 'KeyF':
-            return 0xE;
+            return 0xe;
 
         case 'KeyZ':
-            return 0xA;
+            return 0xa;
         case 'KeyX':
             return 0x0;
         case 'KeyC':
-            return 0xB;
+            return 0xb;
         case 'KeyV':
-            return 0xF;
+            return 0xf;
 
         default:
             return -1;

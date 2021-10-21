@@ -1,42 +1,42 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <title>CHIP-8</title>
-  <meta charset="UTF-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge"  />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="app.css" />
-  <script type="module" src="app.js"></script>
-</head>
-<body class="container">
-    <!-- Canvas at original resolution (will be scaled) -->
-    <canvas width="64" height="32"></canvas>
+    <head>
+        <title>CHIP-8</title>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="app.css" />
+        <script type="module" src="app.js"></script>
+    </head>
+    <body class="container">
+        <!-- Canvas at original resolution (will be scaled) -->
+        <canvas width="64" height="32"></canvas>
 
-    <div>
-        <label for="rom-upload">ROM File:</label>
-        <input type="file" name="rom-upload" id="rom-upload" />
-    </div>
+        <div>
+            <label for="rom-upload">ROM File:</label>
+            <input type="file" name="rom-upload" id="rom-upload" />
+        </div>
 
-    <div class="keypad">
-        <button data-keycode="0x1">1</button>
-        <button data-keycode="0x2">2</button>
-        <button data-keycode="0x3">3</button>
-        <button data-keycode="0xC">C</button>
+        <div class="keypad">
+            <button data-keycode="0x1">1</button>
+            <button data-keycode="0x2">2</button>
+            <button data-keycode="0x3">3</button>
+            <button data-keycode="0xC">C</button>
 
-        <button data-keycode="0x4">4</button>
-        <button data-keycode="0x5">5</button>
-        <button data-keycode="0x6">6</button>
-        <button data-keycode="0xD">D</button>
+            <button data-keycode="0x4">4</button>
+            <button data-keycode="0x5">5</button>
+            <button data-keycode="0x6">6</button>
+            <button data-keycode="0xD">D</button>
 
-        <button data-keycode="0x7">7</button>
-        <button data-keycode="0x8">8</button>
-        <button data-keycode="0x9">9</button>
-        <button data-keycode="0xE">E</button>
+            <button data-keycode="0x7">7</button>
+            <button data-keycode="0x8">8</button>
+            <button data-keycode="0x9">9</button>
+            <button data-keycode="0xE">E</button>
 
-        <button data-keycode="0xA">A</button>
-        <button data-keycode="0x0">0</button>
-        <button data-keycode="0xB">B</button>
-        <button data-keycode="0xF">F</button>
-    </div>
-</body>
+            <button data-keycode="0xA">A</button>
+            <button data-keycode="0x0">0</button>
+            <button data-keycode="0xB">B</button>
+            <button data-keycode="0xF">F</button>
+        </div>
+    </body>
 </html>
