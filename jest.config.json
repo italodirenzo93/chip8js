@@ -1,0 +1,13 @@
+{
+    "moduleFileExtensions": [
+        "js",
+        "ts"
+    ],
+    "transform": {
+        ".*\\.(ts)$": "ts-jest"
+    },
+    "moduleNameMapper": {
+        "^@/(.*)$": "<rootDir>/src/$1"
+    },
+    "testEnvironment": "jsdom"
+}

@@ -63,11 +63,9 @@ export class Chip8 {
     soundTimer = 0;
 
     /**
-     * @param {CanvasRenderingContext2D} context The drawing context to use
+     * @param {CanvasRenderingContext2D} ctx The drawing context to use
      */
-    constructor(private readonly ctx: CanvasRenderingContext2D) {
-        this.clearDisplay();
-    }
+    constructor(private readonly ctx: CanvasRenderingContext2D) {}
 
     get opcode() {
         const msb = this.memory[this.pc];
@@ -160,7 +158,8 @@ export class Chip8 {
     }
 
     clearDisplay() {
-        const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        // const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        const imageData = this.ctx.getImageData(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
         const length = DISPLAY_WIDTH * 4 * DISPLAY_HEIGHT;
 
         for (let i = 0; i < length; i += 4) {

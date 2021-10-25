@@ -15,8 +15,8 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
                 case 0x00e0:
                     vm.clearDisplay();
                     vm.step();
-
                     break;
+
                 // Return from sub-routine
                 case 0x00ee:
                     const addr = vm.stack.pop();
