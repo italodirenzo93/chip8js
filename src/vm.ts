@@ -21,31 +21,52 @@ const fontRom = new Uint8Array([
 ]);
 
 export class Chip8 {
+
+    /**
+     * Main memory.
+     */
+    memory = new Uint8Array(4096);
+
+    /**
+     * Program counter.
+     */
+    pc = ROM_START_OFFSET;
+
+    /**
+     * Call stack.
+     */
+    stack: number[] = [];
+
+    /**
+     * Registers.
+     */
+    v = new Uint8Array(16);
+
+    /**
+     * Index register.
+     */
+    i = 0;
+
+    /**
+     * Key states.
+     */
+    keypad = new Map<number, boolean>();
+
+    /**
+     * Delay timer.
+     */
+    delayTimer = 0;
+
+    /**
+     * A tone is played when this counter is non-zero.
+     */
+    soundTimer = 0;
+
     /**
      * @param {CanvasRenderingContext2D} context The drawing context to use
      */
-    constructor(context) {
-        this.ctx = context;
-
-        // Main VM memory
-        // this.buffer = new ArrayBuffer(4096);
-
-        // Read/write access
-        this.memory = new Uint8Array(4096);
-
-        // Create some spans over specific regions of memory
-        // this.rom = new Uint8Array(this.buffer, 0x200, 3232);
-
-        // Call stack
-        this.stack = [];
-
-        // Registers (V0-VF)
-        this.v = new Uint8Array(16);
-
-        // Keypad
-        this.keypad = new Uint8ClampedArray(16);
-
-        this.reset();
+    constructor(private readonly ctx: CanvasRenderingContext2D) {
+        this.clearDisplay();
     }
 
     get opcode() {
@@ -84,7 +105,7 @@ export class Chip8 {
      *
      * @param {Uint8Array} rom The CHIP-8 program to load
      */
-    loadRom(rom) {
+    loadRom(rom: Uint8Array) {
         let i;
 
         // Load the rom data at program start location
@@ -117,25 +138,25 @@ export class Chip8 {
     /**
      * @param {KeyboardEvent} evt Key press event
      */
-    onKeyDown(evt) {
+    onKeyDown(evt: KeyboardEvent) {
         const key = mapKeyCode(evt.code);
         if (!key) {
             return;
         }
 
-        this.keypad[key] = 1;
+        this.keypad.set(key, true);
     }
 
     /**
      * @param {KeyboardEvent} evt Key press event
      */
-    onKeyUp(evt) {
+    onKeyUp(evt: KeyboardEvent) {
         const key = mapKeyCode(evt.code);
         if (!key) {
             return;
         }
 
-        this.keypad[key] = 0;
+        this.keypad.set(key, false);
     }
 
     clearDisplay() {
@@ -162,7 +183,7 @@ export class Chip8 {
      * @param {number} y Y Coordinate
      * @param {number} n Height
      */
-    drawSprite(x, y, n) {
+    drawSprite(x: number, y: number, n: number) {
         const frame = this.ctx.getImageData(x, y, 8, n);
         const length = x * 4 * n;
 
@@ -204,7 +225,7 @@ export class Chip8 {
 /**
  * @param {string} keyCode
  */
-export function mapKeyCode(keyCode) {
+export function mapKeyCode(keyCode: string): number {
     switch (keyCode) {
         case 'Digit1':
             return 0x1;
@@ -252,14 +273,14 @@ export function mapKeyCode(keyCode) {
  *
  * @param {Chip8} vm
  */
-export function start(vm) {
+export function start(vm: Chip8) {
     setTimeout(() => update(vm), UPDATE_FREQ_HZ);
 }
 
 /**
  * @param {Chip8} vm
  */
-function update(vm) {
+function update(vm: Chip8) {
     const next = executeOpcode(vm, vm.opcode);
 
     // Count down timers

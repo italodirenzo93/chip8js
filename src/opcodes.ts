@@ -4,7 +4,7 @@ import { Chip8 } from './vm';
  * @param {Chip8} vm
  * @param {number} opcode
  */
-export function executeOpcode(vm, opcode) {
+export function executeOpcode(vm: Chip8, opcode: number): boolean {
     console.log('Executing: ' + formatOpcode(opcode));
 
     switch (opcode & 0xf000) {
@@ -19,7 +19,12 @@ export function executeOpcode(vm, opcode) {
                     break;
                 // Return from sub-routine
                 case 0x00ee:
-                    vm.pc = vm.stack.pop();
+                    const addr = vm.stack.pop();
+                    if (!addr) {
+                        throw new Error('No address found on the stack.');
+                    }
+
+                    vm.pc = addr;
                     vm.step();
                     break;
 
@@ -46,7 +51,7 @@ export function executeOpcode(vm, opcode) {
 
         // Equals
         case 0x3000:
-            if ((vm.v[(opcode & 0x0f00) >> 8] === opcode) & 0x00ff) {
+            if (vm.v[(opcode & 0x0f00) >> 8] === (opcode & 0x00ff)) {
                 vm.step(); // skip the next instruction
             }
 
@@ -55,7 +60,7 @@ export function executeOpcode(vm, opcode) {
 
         // Not Equals
         case 0x4000:
-            if ((vm.v[(opcode & 0x0f00) >> 8] !== opcode) & 0x00ff) {
+            if (vm.v[(opcode & 0x0f00) >> 8] !== (opcode & 0x00ff)) {
                 vm.step(); // skip the next instruction
             }
 
@@ -231,7 +236,7 @@ export function executeOpcode(vm, opcode) {
                 switch (opcode & 0x00ff) {
                     // Key down
                     case 0x009e:
-                        if (vm.keypad[keycode] > 0) {
+                        if (vm.keypad.get(keycode)) {
                             vm.step(); // skip the next instruction
                         }
 
@@ -240,7 +245,7 @@ export function executeOpcode(vm, opcode) {
 
                     // Key up
                     case 0x00a1:
-                        if (vm.keypad[keycode] === 0) {
+                        if (!vm.keypad.get(keycode)) {
                             vm.step(); // skip the next instruction
                         }
 
@@ -348,7 +353,7 @@ export function executeOpcode(vm, opcode) {
  * @param {number} opcode
  * @returns {string}
  */
-export function formatOpcode(opcode) {
+export function formatOpcode(opcode: number): string {
     const r = opcode.toString(16).toUpperCase();
     return '0x' + r.padStart(4, '0');
 }
