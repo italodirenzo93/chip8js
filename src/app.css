@@ -28,4 +28,12 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    outline: none;
+    border: 3px solid #000000;
+    border-radius: 4px;
+}
+
+.keypad button:active {
+    background: #555555;
 }
