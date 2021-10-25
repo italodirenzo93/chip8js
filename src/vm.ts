@@ -21,7 +21,6 @@ const fontRom = new Uint8Array([
 ]);
 
 export class Chip8 {
-
     /**
      * Main memory.
      */
@@ -65,7 +64,7 @@ export class Chip8 {
     /**
      * @param {CanvasRenderingContext2D} ctx The drawing context to use
      */
-    constructor(private readonly ctx: CanvasRenderingContext2D) {}
+    constructor(private readonly ctx: CanvasImageData) {}
 
     get opcode() {
         const msb = this.memory[this.pc];
@@ -158,8 +157,10 @@ export class Chip8 {
     }
 
     clearDisplay() {
-        // const imageData = new ImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
-        const imageData = this.ctx.getImageData(0, 0, DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        const imageData = this.ctx.createImageData(
+            DISPLAY_WIDTH,
+            DISPLAY_HEIGHT
+        );
         const length = DISPLAY_WIDTH * 4 * DISPLAY_HEIGHT;
 
         for (let i = 0; i < length; i += 4) {

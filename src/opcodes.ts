@@ -10,32 +10,28 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
     switch (opcode & 0xf000) {
         // Call a machine code routine
         case 0x0000:
-            switch (opcode & 0x00ff) {
+            if ((opcode & 0x00ff) === 0x00e0) {
                 // Clear the display
-                case 0x00e0:
-                    vm.clearDisplay();
-                    vm.step();
-                    break;
-
+                vm.clearDisplay();
+                vm.step();
+            } else if ((opcode & 0x00ff) === 0x00ee) {
                 // Return from sub-routine
-                case 0x00ee:
-                    const addr = vm.stack.pop();
-                    if (!addr) {
-                        throw new Error('No address found on the stack.');
-                    }
+                const addr = vm.stack.pop();
+                if (!addr) {
+                    throw new Error('No address found on the stack.');
+                }
 
-                    vm.pc = addr;
-                    vm.step();
-                    break;
-
-                case 0x0000:
-                    console.log('Program terminated.');
-                    return false;
-
-                default:
-                    console.log('NOOP ' + formatOpcode(opcode));
-                    return false;
+                vm.pc = addr;
+                vm.step();
+            } else if ((opcode & 0x00f0) === 0x0010) {
+                // Exit program
+                console.log('Program terminated.');
+                return false;
+            } else {
+                // Unknown opcode
+                throw new Error('Unrecognized opcode: ' + formatOpcode(opcode));
             }
+
             break;
 
         // JUMP
