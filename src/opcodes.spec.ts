@@ -111,4 +111,26 @@ describe('Opcodes', () => {
             expect(vm.pc).toBe(26);
         });
     });
+
+    describe('5XY0 - Register values equal', () => {
+        it('skips the next instruction if the values are equal', () => {
+            vm.pc = 24;
+            vm.v[2] = 0x50;
+            vm.v[3] = 0x50;
+
+            executeOpcode(vm, 0x5230);
+
+            expect(vm.pc).toBe(28);
+        });
+
+        it('executes the next instruction if the values are not equal', () => {
+            vm.pc = 24;
+            vm.v[2] = 0x46;
+            vm.v[3] = 0x1f;
+
+            executeOpcode(vm, 0x5230);
+
+            expect(vm.pc).toBe(26);
+        });
+    });
 });
