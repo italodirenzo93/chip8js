@@ -155,4 +155,15 @@ describe('Opcodes', () => {
             expect(vm.pc).toBe(48);
         });
     });
+
+    describe('7XNN - Increment value in register X', () => {
+        it('adds NN to the value in the register', () => {
+            vm.pc = 46;
+            vm.v[4] = 0x04;
+            executeOpcode(vm, 0x7404);
+
+            expect(vm.v[4]).toBe(0x08);
+            expect(vm.pc).toBe(48);
+        });
+    });
 });
