@@ -133,4 +133,14 @@ describe('Opcodes', () => {
             expect(vm.pc).toBe(26);
         });
     });
+
+    describe('6XNN - Store value in register X', () => {
+        it('stores the value in the register', () => {
+            vm.pc = 46;
+            executeOpcode(vm, 0x641f);
+
+            expect(vm.v[4]).toBe(0x1f);
+            expect(vm.pc).toBe(48);
+        });
+    });
 });
