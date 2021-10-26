@@ -48,6 +48,18 @@ describe('Opcodes', () => {
         });
     });
 
+    describe('001X - Exit program', () => {
+        it('sets the exit code when when terminating', () => {
+            vm.exitCode = 0;
+            vm.running = true;
+
+            executeOpcode(vm, 0x0011);
+
+            expect(vm.exitCode).toBe(1);
+            expect(vm.running).toBe(false);
+        });
+    });
+
     describe('1NNN - Jump to address', () => {
         it('sets the program counter to the address', () => {
             executeOpcode(vm, 0x1234);

@@ -62,6 +62,16 @@ export class Chip8 {
     soundTimer = 0;
 
     /**
+     * Flag indicating if the program is being executed.
+     */
+    running = false;
+
+    /**
+     * The last exit code returned by the program.
+     */
+    exitCode = 0;
+
+    /**
      * @param {CanvasRenderingContext2D} ctx The drawing context to use
      */
     constructor(private readonly ctx: CanvasImageData) {}
@@ -274,6 +284,7 @@ export function mapKeyCode(keyCode: string): number {
  * @param {Chip8} vm
  */
 export function start(vm: Chip8) {
+    vm.running = true;
     setTimeout(() => update(vm), UPDATE_FREQ_HZ);
 }
 
@@ -281,7 +292,7 @@ export function start(vm: Chip8) {
  * @param {Chip8} vm
  */
 function update(vm: Chip8) {
-    const next = executeOpcode(vm, vm.opcode);
+    executeOpcode(vm, vm.opcode);
 
     // Count down timers
     if (vm.delayTimer > 0) {
@@ -291,7 +302,7 @@ function update(vm: Chip8) {
         vm.soundTimer--;
     }
 
-    if (next) {
+    if (vm.running) {
         setTimeout(() => update(vm), UPDATE_FREQ_HZ);
     }
 }

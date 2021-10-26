@@ -26,6 +26,8 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
             } else if ((opcode & 0x00f0) === 0x0010) {
                 // Exit program
                 console.log('Program terminated.');
+                vm.running = false;
+                vm.exitCode = opcode & 0x000f;
                 return false;
             } else {
                 // Unknown opcode
