@@ -91,4 +91,24 @@ describe('Opcodes', () => {
             expect(vm.pc).toBe(26);
         });
     });
+
+    describe('4XNN - Not Equals', () => {
+        it('skips the next instruction if the values are not equal', () => {
+            vm.pc = 24;
+            vm.v[2] = 0x50;
+
+            executeOpcode(vm, 0x4212);
+
+            expect(vm.pc).toBe(28);
+        });
+
+        it('executes the next instruction if the values are equal', () => {
+            vm.pc = 24;
+            vm.v[2] = 0x46;
+
+            executeOpcode(vm, 0x4246);
+
+            expect(vm.pc).toBe(26);
+        });
+    });
 });
