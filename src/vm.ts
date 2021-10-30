@@ -194,9 +194,7 @@ export class Chip8 {
      * @param {number} n Height
      */
     drawSprite(x: number, y: number, n: number) {
-        const frame = this.ctx.getImageData(x, y, 8, n);
-        const length = x * 4 * n;
-
+        // Normalize values
         if (x >= DISPLAY_WIDTH) {
             x = x % DISPLAY_WIDTH;
         }
@@ -205,17 +203,23 @@ export class Chip8 {
             y = y % DISPLAY_HEIGHT;
         }
 
+        n = Math.min(n, 16);
+
+        const frame = this.ctx.getImageData(x, y, 8, n);
+
         let endX = Math.min(x + 8, DISPLAY_WIDTH);
         let endY = Math.min(y + n, DISPLAY_HEIGHT);
 
         this.v[0xf] = 0x0;
 
-        for (let sy = y; sy < endY; sy++) {
-            const spriteByte = this.memory[this.i + (sy - y)];
-            for (let sx = x; sx < endX; sx++) {}
-        }
+        // for (let sy = y; sy < endY; sy++) {
+        //     const spriteByte = this.memory[this.i + (sy - y)];
+        //     for (let sx = x; sx < endX; sx++) {
+        //         const pixel = sy * n + x;
+        //     }
+        // }
 
-        for (let i = 0; i < length; i += 4) {
+        for (let i = 0; i < frame.data.length; i += 4) {
             const prevOn =
                 frame.data[i] > 0 &&
                 frame.data[i + 1] > 0 &&
