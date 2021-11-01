@@ -205,34 +205,56 @@ export class Chip8 {
 
         n = Math.min(n, 16);
 
-        const frame = this.ctx.getImageData(x, y, 8, n);
+        const frame = this.ctx.getImageData(
+            0,
+            0,
+            DISPLAY_WIDTH,
+            DISPLAY_HEIGHT
+        );
+
+        const getFrameIndex = (x: number, y: number) =>
+            y * (DISPLAY_WIDTH * 4) + x * 4;
+
+        const getPixel = (x: number, y: number) => {
+            const i = getFrameIndex(x, y);
+            return (
+                frame.data[i] > 0 ||
+                frame.data[i + 1] > 0 ||
+                frame.data[i + 2] > 0
+            );
+        };
+        const setPixel = (x: number, y: number, on: boolean) => {
+            const i = getFrameIndex(x, y);
+            const val = on ? PIXEL_ON : PIXEL_OFF;
+
+            frame.data[i] = val;
+            frame.data[i + 1] = val;
+            frame.data[i + 2] = val;
+            frame.data[i + 3] = 0xff; // always opaque
+        };
 
         let endX = Math.min(x + 8, DISPLAY_WIDTH);
         let endY = Math.min(y + n, DISPLAY_HEIGHT);
 
         this.v[0xf] = 0x0;
 
-        // for (let sy = y; sy < endY; sy++) {
-        //     const spriteByte = this.memory[this.i + (sy - y)];
-        //     for (let sx = x; sx < endX; sx++) {
-        //         const pixel = sy * n + x;
-        //     }
-        // }
+        for (let sy = y; sy < endY; sy++) {
+            const spriteByte = this.memory[this.i + (sy - y)];
+            for (let sx = x; sx < endX; sx++) {
+                const spritePixel = spriteByte & (0x80 >> (sx - x));
+                const screenPixel = getPixel(x, y);
 
-        for (let i = 0; i < frame.data.length; i += 4) {
-            const prevOn =
-                frame.data[i] > 0 &&
-                frame.data[i + 1] > 0 &&
-                frame.data[i + 2] > 0;
-            const nextOn = prevOn ? PIXEL_OFF : PIXEL_ON;
+                if (spritePixel) {
+                    if (screenPixel) {
+                        this.v[0xf] = 0x1;
+                    }
 
-            frame.data[i] = nextOn;
-            frame.data[i + 1] = nextOn;
-            frame.data[i + 2] = nextOn;
-            frame.data[i + 3] = 0xff; // alpha
+                    setPixel(x, y, screenPixel);
+                }
+            }
         }
 
-        this.ctx.putImageData(frame, x, y);
+        this.ctx.putImageData(frame, 0, 0);
     }
 }
 
