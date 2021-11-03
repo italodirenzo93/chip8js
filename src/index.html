@@ -12,7 +12,7 @@
         <!-- Canvas at original resolution (will be scaled) -->
         <canvas width="64" height="32"></canvas>
 
-        <div style="margin-bottom: 1rem; margin-top: .6rem;">
+        <div style="margin-bottom: 1rem; margin-top: 0.6rem">
             <label for="rom-upload">ROM File:</label>
             <input type="file" name="rom-upload" id="rom-upload" />
         </div>
@@ -37,6 +37,13 @@
             <button data-keycode="0x0">0</button>
             <button data-keycode="0xB">B</button>
             <button data-keycode="0xF">F</button>
+        </div>
+
+        <div>
+            <button id="dump-fb">Dump Framebuffer</button>
+            <table>
+                <tbody id="fb-table"></tbody>
+            </table>
         </div>
     </body>
 </html>

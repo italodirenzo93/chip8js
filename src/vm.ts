@@ -1,12 +1,28 @@
 import { executeOpcode } from './opcodes';
+import { isBitSet } from './util';
 
 export const DISPLAY_WIDTH = 64;
 export const DISPLAY_HEIGHT = 32;
 
 const ROM_START_OFFSET = 0x200;
 const UPDATE_FREQ_HZ = 16.666666666667;
-const PIXEL_ON = 0xff;
-const PIXEL_OFF = 0x00;
+
+interface RgbColor {
+    r: number;
+    g: number;
+    b: number;
+}
+
+const PIXEL_ON_COLOR: RgbColor = {
+    r: 0xff,
+    g: 0xff,
+    b: 0xff,
+};
+const PIXEL_OFF_COLOR: RgbColor = {
+    r: 0x00,
+    g: 0x00,
+    b: 0x00,
+};
 
 // The character set for the emulator
 const fontRom = new Uint8Array([
@@ -50,6 +66,11 @@ export class Chip8 {
      * Key states.
      */
     keypad = new Map<number, boolean>();
+
+    /**
+     * Framebuffer to be drawn.
+     */
+    display = new Uint8ClampedArray(DISPLAY_WIDTH * DISPLAY_HEIGHT);
 
     /**
      * Delay timer.
@@ -100,7 +121,7 @@ export class Chip8 {
             this.stack = [];
         }
 
-        this.clearDisplay();
+        this.display.fill(0x0);
     }
 
     step() {
@@ -166,23 +187,6 @@ export class Chip8 {
         this.keypad.set(key, false);
     }
 
-    clearDisplay() {
-        const imageData = this.ctx.createImageData(
-            DISPLAY_WIDTH,
-            DISPLAY_HEIGHT
-        );
-        const length = DISPLAY_WIDTH * 4 * DISPLAY_HEIGHT;
-
-        for (let i = 0; i < length; i += 4) {
-            imageData.data[i] = PIXEL_OFF;
-            imageData.data[i + 1] = PIXEL_OFF;
-            imageData.data[i + 2] = PIXEL_OFF;
-            imageData.data[i + 3] = 0xff; // alpha
-        }
-
-        this.ctx.putImageData(imageData, 0, 0);
-    }
-
     /**
      * Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
      * Each row of 8 pixels is read as bit-coded starting from memory location I; I value does
@@ -205,33 +209,12 @@ export class Chip8 {
 
         n = Math.min(n, 16);
 
-        const frame = this.ctx.getImageData(
-            0,
-            0,
-            DISPLAY_WIDTH,
-            DISPLAY_HEIGHT
-        );
+        const getFrameIndex = (x: number, y: number) => y * DISPLAY_WIDTH + x;
 
-        const getFrameIndex = (x: number, y: number) =>
-            y * (DISPLAY_WIDTH * 4) + x * 4;
-
-        const getPixel = (x: number, y: number) => {
-            const i = getFrameIndex(x, y);
-            return (
-                frame.data[i] > 0 ||
-                frame.data[i + 1] > 0 ||
-                frame.data[i + 2] > 0
-            );
-        };
-        const setPixel = (x: number, y: number, on: boolean) => {
-            const i = getFrameIndex(x, y);
-            const val = on ? PIXEL_ON : PIXEL_OFF;
-
-            frame.data[i] = val;
-            frame.data[i + 1] = val;
-            frame.data[i + 2] = val;
-            frame.data[i + 3] = 0xff; // always opaque
-        };
+        const getPixel = (x: number, y: number) =>
+            this.display[getFrameIndex(x, y)];
+        const setPixel = (x: number, y: number, value: number) =>
+            (this.display[getFrameIndex(x, y)] = value);
 
         let endX = Math.min(x + 8, DISPLAY_WIDTH);
         let endY = Math.min(y + n, DISPLAY_HEIGHT);
@@ -242,16 +225,32 @@ export class Chip8 {
             const spriteByte = this.memory[this.i + (sy - y)];
             for (let sx = x; sx < endX; sx++) {
                 const spritePixel = spriteByte & (0x80 >> (sx - x));
-                const screenPixel = getPixel(x, y);
+                const screenPixel = getPixel(sx, sy);
 
                 if (spritePixel) {
                     if (screenPixel) {
                         this.v[0xf] = 0x1;
                     }
 
-                    setPixel(x, y, screenPixel);
+                    setPixel(sx, sy, spritePixel ^ screenPixel);
                 }
             }
+        }
+    }
+
+    drawDisplay() {
+        const frame = this.ctx.createImageData(DISPLAY_WIDTH, DISPLAY_HEIGHT);
+        const length = DISPLAY_WIDTH * DISPLAY_HEIGHT;
+
+        for (let i = 0; i < length; i++) {
+            const frameIndex = i * 4;
+            const pixelColor =
+                this.display[i] > 0 ? PIXEL_ON_COLOR : PIXEL_OFF_COLOR;
+
+            frame.data[frameIndex] = pixelColor.r;
+            frame.data[frameIndex + 1] = pixelColor.g;
+            frame.data[frameIndex + 2] = pixelColor.b;
+            frame.data[frameIndex + 3] = 0xff; // opaque
         }
 
         this.ctx.putImageData(frame, 0, 0);
