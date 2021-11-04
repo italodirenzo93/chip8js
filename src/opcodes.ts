@@ -1,4 +1,4 @@
-import { Chip8 } from './vm';
+import { Chip8, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
 
 /**
  * @param {Chip8} vm
@@ -218,15 +218,54 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
 
         // Draw sprite
         case 0xd000:
-            vm.drawSprite(
-                vm.v[(opcode & 0x0f00) >> 8],
-                vm.v[(opcode & 0x00f0) >> 4],
-                opcode & 0x000f
-            );
+            {
+                let x = (opcode & 0x0f00) >> 8;
+                let y = (opcode & 0x00f0) >> 4;
+                let n = opcode & 0x000f;
 
-            vm.drawDisplay();
+                // Normalize values
+                if (x >= DISPLAY_WIDTH) {
+                    x = x % DISPLAY_WIDTH;
+                }
 
-            vm.step();
+                if (y >= DISPLAY_HEIGHT) {
+                    y = y % DISPLAY_HEIGHT;
+                }
+
+                n = Math.min(n, 16);
+
+                const getFrameIndex = (x: number, y: number) =>
+                    y * DISPLAY_WIDTH + x;
+
+                const getPixel = (x: number, y: number) =>
+                    vm.display[getFrameIndex(x, y)];
+                const setPixel = (x: number, y: number, value: number) =>
+                    (vm.display[getFrameIndex(x, y)] = value);
+
+                let endX = Math.min(x + 8, DISPLAY_WIDTH);
+                let endY = Math.min(y + n, DISPLAY_HEIGHT);
+
+                vm.v[0xf] = 0x0;
+
+                for (let sy = y; sy < endY; sy++) {
+                    const spriteByte = vm.memory[vm.i + (sy - y)];
+                    for (let sx = x; sx < endX; sx++) {
+                        const spritePixel = spriteByte & (0x80 >> (sx - x));
+                        const screenPixel = getPixel(sx, sy);
+
+                        if (spritePixel) {
+                            if (screenPixel) {
+                                vm.v[0xf] = 0x1;
+                            }
+
+                            setPixel(sx, sy, spritePixel ^ screenPixel);
+                        }
+                    }
+                }
+
+                vm.drawDisplay();
+                vm.step();
+            }
             break;
 
         // Check keypad

@@ -1,5 +1,4 @@
 import { executeOpcode } from './opcodes';
-import { isBitSet } from './util';
 
 export const DISPLAY_WIDTH = 64;
 export const DISPLAY_HEIGHT = 32;
@@ -185,57 +184,6 @@ export class Chip8 {
         }
 
         this.keypad.set(key, false);
-    }
-
-    /**
-     * Draws a sprite at coordinate (VX, VY) that has a width of 8 pixels and a height of N pixels.
-     * Each row of 8 pixels is read as bit-coded starting from memory location I; I value does
-     * not change after the execution of this instruction. As described above, VF is set to 1 if any
-     * screen pixels are flipped from set to unset when the sprite is drawn, and to 0 if that does not happen.
-     *
-     * @param {number} x X Coordinate
-     * @param {number} y Y Coordinate
-     * @param {number} n Height
-     */
-    drawSprite(x: number, y: number, n: number) {
-        // Normalize values
-        if (x >= DISPLAY_WIDTH) {
-            x = x % DISPLAY_WIDTH;
-        }
-
-        if (y >= DISPLAY_HEIGHT) {
-            y = y % DISPLAY_HEIGHT;
-        }
-
-        n = Math.min(n, 16);
-
-        const getFrameIndex = (x: number, y: number) => y * DISPLAY_WIDTH + x;
-
-        const getPixel = (x: number, y: number) =>
-            this.display[getFrameIndex(x, y)];
-        const setPixel = (x: number, y: number, value: number) =>
-            (this.display[getFrameIndex(x, y)] = value);
-
-        let endX = Math.min(x + 8, DISPLAY_WIDTH);
-        let endY = Math.min(y + n, DISPLAY_HEIGHT);
-
-        this.v[0xf] = 0x0;
-
-        for (let sy = y; sy < endY; sy++) {
-            const spriteByte = this.memory[this.i + (sy - y)];
-            for (let sx = x; sx < endX; sx++) {
-                const spritePixel = spriteByte & (0x80 >> (sx - x));
-                const screenPixel = getPixel(sx, sy);
-
-                if (spritePixel) {
-                    if (screenPixel) {
-                        this.v[0xf] = 0x1;
-                    }
-
-                    setPixel(sx, sy, spritePixel ^ screenPixel);
-                }
-            }
-        }
     }
 
     drawDisplay() {
