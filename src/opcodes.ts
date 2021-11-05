@@ -219,20 +219,20 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
         // Draw sprite
         case 0xd000:
             {
-                let x = (opcode & 0x0f00) >> 8;
-                let y = (opcode & 0x00f0) >> 4;
-                let n = opcode & 0x000f;
+                let startX = vm.v[(opcode & 0x0f00) >> 8];
+                let startY = vm.v[(opcode & 0x00f0) >> 4];
+                let height = opcode & 0x000f;
 
                 // Normalize values
-                if (x >= DISPLAY_WIDTH) {
-                    x = x % DISPLAY_WIDTH;
+                if (startX >= DISPLAY_WIDTH) {
+                    startX = startX % DISPLAY_WIDTH;
                 }
 
-                if (y >= DISPLAY_HEIGHT) {
-                    y = y % DISPLAY_HEIGHT;
+                if (startY >= DISPLAY_HEIGHT) {
+                    startY = startY % DISPLAY_HEIGHT;
                 }
 
-                n = Math.min(n, 16);
+                height = Math.min(height, 16);
 
                 const getFrameIndex = (x: number, y: number) =>
                     y * DISPLAY_WIDTH + x;
@@ -242,23 +242,23 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
                 const setPixel = (x: number, y: number, value: number) =>
                     (vm.display[getFrameIndex(x, y)] = value);
 
-                let endX = Math.min(x + 8, DISPLAY_WIDTH);
-                let endY = Math.min(y + n, DISPLAY_HEIGHT);
+                let endX = Math.min(startX + 8, DISPLAY_WIDTH);
+                let endY = Math.min(startY + height, DISPLAY_HEIGHT);
 
                 vm.v[0xf] = 0x0;
 
-                for (let sy = y; sy < endY; sy++) {
-                    const spriteByte = vm.memory[vm.i + (sy - y)];
-                    for (let sx = x; sx < endX; sx++) {
-                        const spritePixel = spriteByte & (0x80 >> (sx - x));
-                        const screenPixel = getPixel(sx, sy);
+                for (let y = startY; y < endY; y++) {
+                    const spriteByte = vm.memory[vm.i + (y - startY)];
+                    for (let x = startX; x < endX; x++) {
+                        const spritePixel = spriteByte & (0x80 >> (x - startX));
+                        const screenPixel = getPixel(x, y);
 
                         if (spritePixel) {
                             if (screenPixel) {
                                 vm.v[0xf] = 0x1;
                             }
 
-                            setPixel(sx, sy, spritePixel ^ screenPixel);
+                            setPixel(x, y, spritePixel ^ screenPixel);
                         }
                     }
                 }
