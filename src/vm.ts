@@ -1,4 +1,5 @@
 import { executeOpcode } from './opcodes';
+import { init as initAudio, update as updateAudio } from './audio';
 
 export const DISPLAY_WIDTH = 64;
 export const DISPLAY_HEIGHT = 32;
@@ -258,6 +259,7 @@ export function mapKeyCode(keyCode: string): number {
  */
 export function start(vm: Chip8) {
     vm.running = true;
+    initAudio();
     setTimeout(() => update(vm), UPDATE_FREQ_HZ);
 }
 
@@ -266,6 +268,8 @@ export function start(vm: Chip8) {
  */
 function update(vm: Chip8) {
     executeOpcode(vm, vm.opcode);
+
+    updateAudio(vm.soundTimer);
 
     // Count down timers
     if (vm.delayTimer > 0) {

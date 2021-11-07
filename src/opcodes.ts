@@ -5,7 +5,7 @@ import { Chip8, DISPLAY_WIDTH, DISPLAY_HEIGHT } from './vm';
  * @param {number} opcode
  */
 export function executeOpcode(vm: Chip8, opcode: number): boolean {
-    console.log('Executing: ' + formatOpcode(opcode));
+    //console.log('Executing: ' + formatOpcode(opcode));
 
     switch (opcode & 0xf000) {
         // Call a machine code routine

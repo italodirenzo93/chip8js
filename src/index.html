@@ -13,8 +13,21 @@
         <canvas width="64" height="32"></canvas>
 
         <div style="margin-bottom: 1rem; margin-top: 0.6rem">
-            <label for="rom-upload">ROM File:</label>
-            <input type="file" name="rom-upload" id="rom-upload" />
+            <div>
+                <label for="rom-upload">ROM File:</label>
+                <input type="file" name="rom-upload" id="rom-upload" />
+            </div>
+            <div>
+                <label for="volume">Volume</label>
+                <input
+                    type="range"
+                    name="volume"
+                    id="volume"
+                    min="0"
+                    max="1"
+                    step="0.01"
+                />
+            </div>
         </div>
 
         <div class="keypad">

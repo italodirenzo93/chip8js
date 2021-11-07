@@ -1,3 +1,4 @@
+import { setVolume } from './audio';
 import { Chip8, start } from './vm';
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
@@ -38,4 +39,11 @@ keypad.addEventListener('mouseup', (e) => {
     if (e.target) {
         setKeyState(e.target as HTMLElement, false);
     }
+});
+
+const volumeSlider = document.querySelector('#volume') as HTMLInputElement;
+
+volumeSlider.addEventListener('input', () => {
+    const volume = Number(volumeSlider.value);
+    setVolume(volume);
 });
