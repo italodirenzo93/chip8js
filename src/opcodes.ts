@@ -13,7 +13,6 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
             if ((opcode & 0x00ff) === 0x00e0) {
                 // Clear the display
                 vm.display.fill(0x00);
-                vm.drawDisplay();
                 vm.step();
             } else if ((opcode & 0x00ff) === 0x00ee) {
                 // Return from sub-routine
@@ -263,7 +262,6 @@ export function executeOpcode(vm: Chip8, opcode: number): boolean {
                     }
                 }
 
-                vm.drawDisplay();
                 vm.step();
             }
             break;

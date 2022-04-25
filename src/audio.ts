@@ -4,6 +4,8 @@ let oscillatorNode: OscillatorNode;
 let volumeNode: GainNode;
 
 export function init() {
+    if (audioContext) return;
+
     audioContext = new AudioContext();
 
     gateNode = audioContext.createGain();

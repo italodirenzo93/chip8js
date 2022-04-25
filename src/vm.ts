@@ -260,26 +260,36 @@ export function mapKeyCode(keyCode: string): number {
 export function start(vm: Chip8) {
     vm.running = true;
     initAudio();
-    setTimeout(() => update(vm), UPDATE_FREQ_HZ);
+
+    requestAnimationFrame(() => update(vm));
 }
+
+let then = performance.now();
 
 /**
  * @param {Chip8} vm
  */
 function update(vm: Chip8) {
-    executeOpcode(vm, vm.opcode);
+    const now = performance.now();
+    const dt = now - then;
 
-    updateAudio(vm.soundTimer);
+    if (dt > UPDATE_FREQ_HZ) {
+        executeOpcode(vm, vm.opcode);
+        vm.drawDisplay();
+        updateAudio(vm.soundTimer);
 
-    // Count down timers
-    if (vm.delayTimer > 0) {
-        vm.delayTimer--;
+        // Count down timers
+        if (vm.delayTimer > 0) {
+            vm.delayTimer--;
+        }
+        if (vm.soundTimer > 0) {
+            vm.soundTimer--;
+        }
     }
-    if (vm.soundTimer > 0) {
-        vm.soundTimer--;
-    }
+
+    then = now;
 
     if (vm.running) {
-        setTimeout(() => update(vm), UPDATE_FREQ_HZ);
+        requestAnimationFrame(() => update(vm));
     }
 }
