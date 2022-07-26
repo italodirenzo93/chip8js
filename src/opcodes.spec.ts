@@ -1,4 +1,4 @@
-import { Chip8 } from './vm';
+import { Chip8, DISPLAY_HEIGHT, DISPLAY_WIDTH } from './vm';
 import { executeOpcode } from './opcodes';
 
 const randomInt = (max = 4096, min = 0) =>
@@ -6,7 +6,7 @@ const randomInt = (max = 4096, min = 0) =>
 
 describe('Opcodes', () => {
     let vm: Chip8;
-    let mockCtx: CanvasImageData;
+    let mockCtx: jest.Mocked<CanvasImageData>;
 
     beforeEach(() => {
         mockCtx = {
@@ -20,12 +20,16 @@ describe('Opcodes', () => {
 
     describe('00E0 - Clear display', () => {
         it('clears the display', () => {
+            mockCtx.createImageData.mockReturnValue({
+                data: new Uint8ClampedArray(DISPLAY_WIDTH * DISPLAY_HEIGHT),
+                width: DISPLAY_WIDTH,
+                height: DISPLAY_HEIGHT
+            } as ImageData)
+
             vm.pc = 42;
-            vm.clearDisplay = jest.fn();
 
             executeOpcode(vm, 0x00e0);
 
-            expect(vm.clearDisplay).toBeCalledTimes(1);
             expect(vm.pc).toBe(44);
         });
     });
