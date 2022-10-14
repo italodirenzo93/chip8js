@@ -1,9 +1,15 @@
 import { setVolume } from './audio';
 import { Chip8, start } from './vm';
+import { KeypadButton, KeymapRow } from './customElements';
+
+customElements.define('keypad-button', KeypadButton, { extends: 'button' });
+customElements.define('keymap-row', KeymapRow, { extends: 'tr' });
 
 const canvas = document.querySelector('canvas') as HTMLCanvasElement;
 
 const vm = new Chip8(canvas.getContext('2d')!);
+
+vm.attachListeners();
 
 // Files
 const romInput = document.querySelector('#rom-upload') as HTMLInputElement;
@@ -22,22 +28,17 @@ romInput.addEventListener('input', async () => {
 // Input
 const keypad = document.querySelector('.keypad') as HTMLDivElement;
 
-const setKeyState = (element: HTMLElement, isDown: boolean) => {
-    const keyCode = element.dataset['keycode'];
-    if (keyCode) {
-        vm.keypad.set(Number(keyCode), isDown);
-    }
-};
-
 keypad.addEventListener('mousedown', (e) => {
-    if (e.target) {
-        setKeyState(e.target as HTMLElement, true);
+    if (e.target instanceof KeypadButton) {
+        // setKeyState(e.target as HTMLElement, true);
+        vm.keypad.set(e.target.keycode, true);
     }
 });
 
 keypad.addEventListener('mouseup', (e) => {
-    if (e.target) {
-        setKeyState(e.target as HTMLElement, false);
+    if (e.target instanceof KeypadButton) {
+        // setKeyState(e.target as HTMLElement, false);
+        vm.keypad.set(e.target.keycode, false);
     }
 });
 

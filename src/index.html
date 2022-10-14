@@ -26,30 +26,59 @@
                     min="0"
                     max="1"
                     step="0.01"
+                    value="1"
                 />
             </div>
         </div>
 
         <div class="keypad">
-            <button data-keycode="0x1">1</button>
-            <button data-keycode="0x2">2</button>
-            <button data-keycode="0x3">3</button>
-            <button data-keycode="0xC">C</button>
+            <button is="keypad-button" key="1"></button>
+            <button is="keypad-button" key="2"></button>
+            <button is="keypad-button" key="3"></button>
+            <button is="keypad-button" key="C"></button>
 
-            <button data-keycode="0x4">4</button>
-            <button data-keycode="0x5">5</button>
-            <button data-keycode="0x6">6</button>
-            <button data-keycode="0xD">D</button>
+            <button is="keypad-button" key="4"></button>
+            <button is="keypad-button" key="5"></button>
+            <button is="keypad-button" key="6"></button>
+            <button is="keypad-button" key="D"></button>
 
-            <button data-keycode="0x7">7</button>
-            <button data-keycode="0x8">8</button>
-            <button data-keycode="0x9">9</button>
-            <button data-keycode="0xE">E</button>
+            <button is="keypad-button" key="7"></button>
+            <button is="keypad-button" key="8"></button>
+            <button is="keypad-button" key="9"></button>
+            <button is="keypad-button" key="E"></button>
 
-            <button data-keycode="0xA">A</button>
-            <button data-keycode="0x0">0</button>
-            <button data-keycode="0xB">B</button>
-            <button data-keycode="0xF">F</button>
+            <button is="keypad-button" key="A"></button>
+            <button is="keypad-button" key="0"></button>
+            <button is="keypad-button" key="B"></button>
+            <button is="keypad-button" key="F"></button>
         </div>
+
+
+        <table class="keymap">
+            <thead>
+                <tr>
+                    <th>QWERTY Key</th>
+                    <th>CHIP-8 Key</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr is="keymap-row" source-key="1" target-key="1"></tr>
+                <tr is="keymap-row" source-key="2" target-key="2"></tr>
+                <tr is="keymap-row" source-key="3" target-key="3"></tr>
+                <tr is="keymap-row" source-key="Q" target-key="4"></tr>
+                <tr is="keymap-row" source-key="W" target-key="5"></tr>
+                <tr is="keymap-row" source-key="E" target-key="6"></tr>
+                <tr is="keymap-row" source-key="A" target-key="7"></tr>
+                <tr is="keymap-row" source-key="S" target-key="8"></tr>
+                <tr is="keymap-row" source-key="D" target-key="9"></tr>
+                <tr is="keymap-row" source-key="Z" target-key="A"></tr>
+                <tr is="keymap-row" source-key="X" target-key="0"></tr>
+                <tr is="keymap-row" source-key="C" target-key="B"></tr>
+                <tr is="keymap-row" source-key="4" target-key="C"></tr>
+                <tr is="keymap-row" source-key="R" target-key="D"></tr>
+                <tr is="keymap-row" source-key="F" target-key="E"></tr>
+                <tr is="keymap-row" source-key="V" target-key="F"></tr>
+            </tbody>
+        </table>
     </body>
 </html>
